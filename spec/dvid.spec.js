@@ -26,6 +26,17 @@ describe('dvid', function() {
     });
   });
 
+  it("connects to a server and fetches the repos info", function(done) {
+    this.dvid.connect({host: 'emdata1', port: 8500});
+    expect(this.dvid.config.host).toBe('emdata1');
+    expect(this.dvid.config.port).toBe(8500);
+
+    this.dvid.reposInfo(function(res){
+      expect(res['0c8bc973dba74729880dd1bdfd8d0c5e'].Alias).toBe('AL-7');
+      done();
+    });
+  });
+
   it("connects to a server and fetches info for a single repo", function(done) {
     this.dvid.connect({host: 'emdata1', port: 8500});
     this.dvid.get('36645473972544e39c6ed90c4643c8a9', 'info', {}, function(res){
