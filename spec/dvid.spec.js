@@ -39,17 +39,25 @@ describe('dvid', function() {
 
   it("connects to a server and fetches info for a single repo", function(done) {
     this.dvid.connect({host: 'emdata1', port: 8500});
-    this.dvid.get('36645473972544e39c6ed90c4643c8a9', 'info', {}, function(res){
-      expect(res.Alias).toEqual('MB-6');
-      done();
+    this.dvid.get({
+      uuid: '36645473972544e39c6ed90c4643c8a9',
+      endpoint: 'info',
+      callback: function(res){
+        expect(res.Alias).toEqual('MB-6');
+        done();
+      }
     });
   });
 
   it("connects to a server and fetches datatype info for a node", function(done) {
     this.dvid.connect({host: 'emdata1', port: 8500});
-    this.dvid.node('36645473972544e39c6ed90c4643c8a9', 'grayscale/info', {}, function(res){
-      expect(res.Base.TypeName).toEqual('uint8blk');
-      done();
+    this.dvid.node({
+      uuid: '36645473972544e39c6ed90c4643c8a9',
+      endpoint: 'grayscale/info',
+      callback: function(res){
+        expect(res.Base.TypeName).toEqual('uint8blk');
+        done();
+      }
     });
   });
 
