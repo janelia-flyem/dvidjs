@@ -61,4 +61,18 @@ describe('dvid', function() {
     });
   });
 
+  it("creates the correct isotropic image urls", function() {
+    this.dvid.connect({host: 'emdata1', port: 8500});
+    var url = this.dvid.isoImageUrl({
+      uuid: '12345',
+      tileSource: 'grayscale',
+      axis: 'xy',
+      size: 512,
+      x: 2300,
+      y: 2300,
+      z: 3000
+    });
+    expect(url).toBe('http://emdata1:8500/api/node/12345/grayscale/isotropic/xy/512_512/2300_2300_3000/jpg');
+  });
+
 });
