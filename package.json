@@ -12,7 +12,7 @@
     "images"
   ],
   "author": "Jody Clements",
-  "license": "MIT",
+  "license": "Janelia",
   "devDependencies": {
     "jasmine": "^2.3.1",
     "grunt": "^0.4.5",
