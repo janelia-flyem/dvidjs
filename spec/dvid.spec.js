@@ -4,42 +4,37 @@ describe('dvid', function() {
     this.dvid = dvid;
   });
 
-  it("config should be undefined if connect hasn't been called", function() {
-    expect(this.dvid.config.host).toBe(undefined);
-    expect(this.dvid.config.port).toBe(undefined);
-  });
-
   it("config defaults should be used if connect is called without options", function() {
-    this.dvid.connect();
-    expect(this.dvid.config.host).toBe(undefined);
-    expect(this.dvid.config.port).toBe(80);
+    var con1 = this.dvid.connect();
+    expect(con1.config.host).toBe(undefined);
+    expect(con1.config.port).toBe(80);
   });
 
   it("connects to a server and fetches the server info", function(done) {
-    this.dvid.connect({host: 'emdata1', port: 8500});
-    expect(this.dvid.config.host).toBe('emdata1');
-    expect(this.dvid.config.port).toBe(8500);
+    var con1 = this.dvid.connect({host: 'emdata1', port: 8500});
+    expect(con1.config.host).toBe('emdata1');
+    expect(con1.config.port).toBe(8500);
 
-    this.dvid.serverInfo(function(res){
+    con1.serverInfo(function(res){
       expect(res.Cores).toBe('32');
       done();
     });
   });
 
   it("connects to a server and fetches the repos info", function(done) {
-    this.dvid.connect({host: 'emdata1', port: 8500});
-    expect(this.dvid.config.host).toBe('emdata1');
-    expect(this.dvid.config.port).toBe(8500);
+    var con1 = this.dvid.connect({host: 'emdata1', port: 8500});
+    expect(con1.config.host).toBe('emdata1');
+    expect(con1.config.port).toBe(8500);
 
-    this.dvid.reposInfo(function(res){
+    con1.reposInfo(function(res){
       expect(res['0c8bc973dba74729880dd1bdfd8d0c5e'].Alias).toBe('AL-7');
       done();
     });
   });
 
   it("connects to a server and fetches info for a single repo", function(done) {
-    this.dvid.connect({host: 'emdata1', port: 8500});
-    this.dvid.get({
+    var con1 = this.dvid.connect({host: 'emdata1', port: 8500});
+    con1.get({
       uuid: '36645473972544e39c6ed90c4643c8a9',
       endpoint: 'info',
       callback: function(res){
@@ -50,8 +45,8 @@ describe('dvid', function() {
   });
 
   it("connects to a server and fetches datatype info for a node", function(done) {
-    this.dvid.connect({host: 'emdata1', port: 8500});
-    this.dvid.node({
+    var con1 = this.dvid.connect({host: 'emdata1', port: 8500});
+    con1.node({
       uuid: '36645473972544e39c6ed90c4643c8a9',
       endpoint: 'grayscale/info',
       callback: function(res){
@@ -62,8 +57,8 @@ describe('dvid', function() {
   });
 
   it("creates the correct isotropic image urls", function() {
-    this.dvid.connect({host: 'emdata1', port: 8500});
-    var url = this.dvid.isoImageUrl({
+    var con1 = this.dvid.connect({host: 'emdata1', port: 8500});
+    var url = con1.isoImageUrl({
       uuid: '12345',
       tileSource: 'grayscale',
       axis: 'xy',
@@ -73,6 +68,13 @@ describe('dvid', function() {
       z: 3000
     });
     expect(url).toBe('http://emdata1:8500/api/node/12345/grayscale/isotropic/xy/512_512/2300_2300_3000/jpg');
+  });
+
+  it("connects to multiple servers with different objects", function() {
+    var con1 = this.dvid.connect({host: 'emdata1', port: 8500});
+    var con2 = this.dvid.connect({host: 'emdata2', port: 8500});
+    expect(con1.config.host).toBe('emdata1');
+    expect(con2.config.host).toBe('emdata2');
   });
 
 });
