@@ -2,6 +2,7 @@
   "name": "dvid",
   "version": "0.1.0",
   "description": "DVID API",
+  "repository": {"type": "git", "url": "https://github.com/janelia-flyem/dvidjs"},
   "main": "./lib/dvid.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,7 +13,7 @@
     "images"
   ],
   "author": "Jody Clements",
-  "license": "Janelia",
+  "license": { "type": "Janelia", "url": "http://janelia-flyem.github.io/janelia_farm_license.html" },
   "devDependencies": {
     "jasmine": "^2.3.1",
     "grunt": "^0.4.5",
