@@ -7,7 +7,7 @@ JavaScript API to access a DVID server
 Install
 =======
 
-    npm install /path/to/dvid/repo/clone
+    npm install /path/to/dvidjs/repo/clone
 
 Examples
 ========
