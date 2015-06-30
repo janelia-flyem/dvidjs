@@ -7,7 +7,7 @@ JavaScript API to access a DVID server
 Install
 =======
 
-  npm install dvid
+    npm install dvid
 
 Examples
 ========
