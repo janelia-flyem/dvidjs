@@ -15,9 +15,11 @@ describe('dvid', function() {
     expect(con1.config.host).toBe('emdata1');
     expect(con1.config.port).toBe(8500);
 
-    con1.serverInfo(function(res){
-      expect(res.Cores).toBe('32');
-      done();
+    con1.serverInfo({
+      callback: function(res){
+        expect(res.Cores).toBe('32');
+        done();
+      }
     });
   });
 
@@ -26,9 +28,11 @@ describe('dvid', function() {
     expect(con1.config.host).toBe('emdata1');
     expect(con1.config.port).toBe(8500);
 
-    con1.reposInfo(function(res){
-      expect(res['0c8bc973dba74729880dd1bdfd8d0c5e'].Alias).toBe('AL-7');
-      done();
+    con1.reposInfo({
+      callback: function(res){
+        expect(res['0c8bc973dba74729880dd1bdfd8d0c5e'].Alias).toBe('AL-7');
+        done();
+      }
     });
   });
 
@@ -75,6 +79,40 @@ describe('dvid', function() {
     var con2 = this.dvid.connect({host: 'emdata2', port: 8500});
     expect(con1.config.host).toBe('emdata1');
     expect(con2.config.host).toBe('emdata2');
+  });
+
+  it("fails gracefully when connecting to a server that doesn't exist.", function(done) {
+    var con1 = this.dvid.connect({host: 'emdata1', port: 2});
+    con1.reposInfo({
+      callback: function(res){
+        done();
+      },
+      error: function(err) {
+        expect(err.message).toBe('Failed to connect to the server');
+        done();
+      }
+    });
+  });
+
+  it("throws an error when a callback is not set to handle the response", function() {
+    var con1 = this.dvid.connect({host: 'emdata1', port: 8500});
+    expect( function() {con1.reposInfo() }).toThrow(new Error("Callback not set to handle response"));
+  });
+
+  it("fails gracefully when connecting to a bad url", function(done) {
+    var con1 = this.dvid.connect({host: 'emdata1', port: 8500});
+    con1.node({
+      uuid: '36645473972544e39c6ed90c4643c8a9',
+      endpoint: 'gray/info',
+      callback: function(res){
+        expect(res.Base.TypeName).toEqual('uint8blk');
+        done();
+      },
+      error: function(err) {
+        expect(err.message).toBe('Server responded with an error: 400');
+        done();
+      }
+    });
   });
 
 });
