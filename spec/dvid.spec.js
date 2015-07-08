@@ -105,7 +105,6 @@ describe('dvid', function() {
       uuid: '36645473972544e39c6ed90c4643c8a9',
       endpoint: 'gray/info',
       callback: function(res){
-        expect(res.Base.TypeName).toEqual('uint8blk');
         done();
       },
       error: function(err) {
@@ -115,4 +114,16 @@ describe('dvid', function() {
     });
   });
 
+  it("fails gracefully when connecting to a bad port", function(done) {
+    var con1 = this.dvid.connect({host: 'emdata1', port: 85001});
+    con1.reposInfo({
+      callback: function(res){
+        done();
+      },
+      error: function(err) {
+        expect(err.message).toBe('Failed to connect to the server');
+        done();
+      }
+    });
+  });
 });
