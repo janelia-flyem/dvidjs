@@ -126,4 +126,22 @@ describe('dvid', function() {
       }
     });
   });
+/*
+  it("it creates a new repo", function(done) {
+    var con1 = this.dvid.connect({host: 'localhost', port: 4000});
+    con1.createRepo({
+      alias: 'Test Repo',
+      description: 'A test repo created via the web api again',
+      callback: function(res){
+        expect(res).toBe('a valid uuid');
+        done();
+      },
+      error: function(err) {
+        console.log(err);
+        expect(err).toBe('failure');
+        done();
+      }
+    });
+  });
+*/
 });
