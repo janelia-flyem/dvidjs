@@ -38,7 +38,7 @@ describe('dvid', function() {
 
   it("connects to a server and fetches info for a single repo", function(done) {
     var con1 = this.dvid.connect({host: 'emdata1', port: 8500});
-    con1.get({
+    con1.repo({
       uuid: '36645473972544e39c6ed90c4643c8a9',
       endpoint: 'info',
       callback: function(res){
