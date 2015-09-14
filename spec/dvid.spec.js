@@ -108,7 +108,7 @@ describe('dvid', function() {
         done();
       },
       error: function(err) {
-        expect(err.message).toBe('Server responded with an error: 400');
+        expect(err.message).toBe("Server responded with an error: (400) invalid data instance name (/api/node/36645473972544e39c6ed90c4643c8a9/gray/info).\n");
         done();
       }
     });
