@@ -9,7 +9,7 @@ describe('dvid', function () {
     assert.equal('This is the dvid api', dvid.about());
   });
   it('should return a connection object', function () {
-    var new_connection = dvid.connect({host: 'foo'});
+    var new_connection = dvid.connect();
     assert.ok(new_connection instanceof Connection);
   });
   it('should report the correct version number', function() {
@@ -25,17 +25,15 @@ describe('connection', function() {
   });
 
   it('should set a default port on creation', function() {
-    var conn = dvid.connect({host: 'foo'});
+    var conn = dvid.connect();
     assert.equal('80', conn.config.port);
-    assert.equal('foo', conn.config.host);
+    assert.equal(undefined, conn.config.host);
   });
 
-  it('should throw an error with bad configuration values', function() {
-    try {
-      var conn = dvid.connect();
-    } catch (e) {
-      assert.ok(e instanceof Error);
-      assert.equal("A 'host' value must be provided to the connection on creation.", e.message);
-    }
+  it('should create a valid url when given good data', function() {
+    var conn = dvid.connect();
+    var url = conn.createUrl('bar/baz');
+    assert.equal('/bar/baz', url);
   });
+
 });
