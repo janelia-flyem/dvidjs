@@ -2,6 +2,7 @@ DVIDjs
 ======
 
 JavaScript API to access a DVID server
+
 [![Build Status](https://drone.io/github.com/janelia-flyem/dvidjs/status.png)](https://drone.io/github.com/janelia-flyem/dvidjs/latest)
 
 Install
