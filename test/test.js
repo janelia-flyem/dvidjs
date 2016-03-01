@@ -81,4 +81,13 @@ describe('connection', function() {
     assert.equal("https://www.foo.com/api/node/123/test/isotropic/xy/512_512/12_34_56/jpg", url);
   });
 
+  it('should return valid server info', function() {
+    var conn = dvid.connect({host: 'localhost', port: '4000'});
+    conn.serverInfo({
+      callback: function(res) {
+        assert.equal('8', res.Cores);
+      }
+    });
+  });
+
 });
