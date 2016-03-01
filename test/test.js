@@ -21,19 +21,64 @@ describe('connection', function() {
   it('should accept a configuration on creation', function() {
     var conn = dvid.connect({host: 'http://www.example.com', port: '1234'});
     assert.equal('1234', conn.config.port);
-    assert.equal('http://www.example.com', conn.config.host);
+    assert.equal('www.example.com', conn.config.host);
   });
 
-  it('should set a default port on creation', function() {
+  it('should set undefined as default on creation with no arguments', function() {
     var conn = dvid.connect();
-    assert.equal('80', conn.config.port);
+    assert.equal(undefined, conn.config.port);
     assert.equal(undefined, conn.config.host);
   });
 
-  it('should create a valid url when given good data', function() {
+  it('should create a valid url when given good data and no host', function() {
     var conn = dvid.connect();
     var url = conn.createUrl('bar/baz');
     assert.equal('/bar/baz', url);
+
+    var url2 = conn.createUrl('/bar/baz');
+    assert.equal('/bar/baz', url2);
+
+    var url3 = conn.createUrl('http://foo.com/bar/baz');
+    assert.equal('http://foo.com/bar/baz', url3);
+
+  });
+
+  it('should create a valid url when given good data and a host', function() {
+    var conn = dvid.connect({host: 'wibble.com'});
+    var url = conn.createUrl('bar/baz');
+    assert.equal('http://wibble.com/bar/baz', url);
+  });
+
+  it('should use the correct protocol', function() {
+    var conn = dvid.connect({host: 'https://www.foo.com'});
+    var url = conn.createUrl('bar/baz');
+    assert.equal("https://www.foo.com/bar/baz", url);
+
+    var conn2 = dvid.connect({host: 'https://www.foo.com', port: '8000'});
+    var url2 = conn2.createUrl('bar/baz');
+    assert.equal("https://www.foo.com:8000/bar/baz", url2);
+
+    var conn3 = dvid.connect({host: 'foo.com', port: '8000', protocol: 'https'});
+    var url3 = conn3.createUrl('bar/baz');
+    assert.equal("https://foo.com:8000/bar/baz", url3);
+
+    var conn4 = dvid.connect({host: 'foo.com'});
+    var url4 = conn4.createUrl('bar/baz');
+    assert.equal("http://foo.com/bar/baz", url4);
+  });
+
+  it('should create valid iso image urls', function() {
+    var conn = dvid.connect({host: 'https://www.foo.com'});
+    var url = conn.isoImageUrl({
+      uuid: '123',
+      tileSource: 'test',
+      axis: 'xy',
+      size: '512',
+      x: '12',
+      y: '34',
+      z: '56'
+    });
+    assert.equal("https://www.foo.com/api/node/123/test/isotropic/xy/512_512/12_34_56/jpg", url);
   });
 
 });
