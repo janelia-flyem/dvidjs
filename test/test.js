@@ -11,6 +11,7 @@ require('mocha-sinon');
 
 var test_host = 'localhost';
 var test_port = '5050';
+var uuid = '24e6ace57d834383bb24ea2b6d38392a';
 
 before(function() {
   var server = shmock(test_port);
@@ -19,9 +20,22 @@ before(function() {
   server.get('/api/server/compiled-types').reply(200, '{"annotation": "github.com/janelia-flyem/dvid/datatype/annotation", "googlevoxels": "github.com/janelia-flyem/dvid/datatype/googlevoxels", "imagetile": "github.com/janelia-flyem/dvid/datatype/imagetile", "keyvalue": "github.com/janelia-flyem/dvid/datatype/keyvalue", "labelblk": "github.com/janelia-flyem/dvid/datatype/labelblk", "labelgraph": "github.com/janelia-flyem/dvid/datatype/labelgraph", "labelvol": "github.com/janelia-flyem/dvid/datatype/labelvol", "multichan16": "github.com/janelia-flyem/dvid/datatype/multichan16", "rgba8blk": "github.com/janelia-flyem/dvid/datatype/imageblk/rgba8.go", "roi": "github.com/janelia-flyem/dvid/datatype/roi", "synapse": "github.com/janelia-flyem/dvid/datatype/synapse", "uint8blk": "github.com/janelia-flyem/dvid/datatype/imageblk/uint8.go"}');
   server.get('/api/load').reply(200, '{"GET requests": 0, "PUT requests": 0, "active CGo routines": 0, "file bytes read": 0, "file bytes written": 0, "goroutines": 15, "handlers active": 0, "key bytes read": 0, "key bytes written": 0, "value bytes read": 0, "value bytes written": 0}');
   server.get('/api/repo/1234/info').reply(200, '{}');
+
+  fs.readFile(__dirname + '/data/repo_log.json', function(err, data) {
+    server.get('/api/repo/' + uuid + '/log').reply(200, data);
+  });
+
+  fs.readFile(__dirname + '/data/repo_info.json', function(err, data) {
+    server.get('/api/repo/' + uuid + '/info').reply(200, data);
+  });
+
   fs.readFile(__dirname + '/data/repos_info.json', function(err, data) {
     server.get('/api/repos/info').reply(200, data);
   });
+
+  server.post('/api/repo/' + uuid + '/instance').reply(200, '{"result": "Added labels [labelvol] to node '+ uuid +'"}');
+  server.post('/api/repo/' + uuid + '/log').reply(200);
+
 });
 
 describe('dvid', function () {
@@ -152,6 +166,72 @@ describe('api requests', function() {
       }
     });
   });
+});
+
+describe('single repository requests', function() {
+  var conn = dvid.connect({host: test_host, port: test_port});
+
+  it('should get meta information from a single repository', function(done) {
+    conn.repo({
+      'uuid': uuid,
+      'endpoint': 'info',
+      'callback': function(data) {
+        assert.equal(9, Object.keys(data).length);
+        assert.equal(uuid, data.Root);
+        assert.equal("node test", data.Alias);
+        done();
+      }
+    });
+  });
+
+  it('should get log information', function(done) {
+    conn.repo({
+      'uuid': uuid,
+      'endpoint': 'log',
+      'callback': function(data) {
+        assert.equal(1, Object.keys(data).length);
+        assert.equal("2015-09-14T13:54:24-04:00  123", data.log[0]);
+        done();
+      }
+    });
+  });
+
+  it('should create a new log entry', function(done) {
+    conn.repo({
+      'uuid': uuid,
+      'method': 'POST',
+      'endpoint': 'log',
+      'payload': '{ "log": [ "test entry 1" ] }',
+      'callback': function(data) {
+        // response from log post should be empty
+        assert.equal(undefined, data);
+        done();
+      },
+      'error': function(err) {
+        console.log(err);
+      }
+    });
+
+  });
+
+  it('should create a new data instance', function(done) {
+    conn.repo({
+      'uuid': uuid,
+      'method': 'POST',
+      'endpoint': 'instance',
+      'payload': '{"typename": "labelvol", "dataname": "labels", "versioned": 0 }',
+      'callback': function(data) {
+        assert.equal(1, Object.keys(data).length);
+        done();
+      },
+      'error': function(err) {
+        console.log(err);
+      }
+    });
+
+  });
+
+
 });
 
 describe('deprecated requests', function() {
