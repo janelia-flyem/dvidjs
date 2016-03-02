@@ -3,6 +3,12 @@ var assert = require('assert');
 var dvid = require('../lib/dvid');
 var Connection = require('../lib/connection');
 var pjson = require('../package.json');
+var shmock = require('shmock');
+
+before(function() {
+  var server = shmock(5050);
+  server.get('/api/server/info').reply(200, '{"Cores": 8}');
+});
 
 describe('dvid', function () {
   it('should describe itself', function() {
@@ -81,11 +87,12 @@ describe('connection', function() {
     assert.equal("https://www.foo.com/api/node/123/test/isotropic/xy/512_512/12_34_56/jpg", url);
   });
 
-  it('should return valid server info', function() {
-    var conn = dvid.connect({host: 'localhost', port: '4000'});
+  it('should return valid server info', function(done) {
+    var conn = dvid.connect({host: 'localhost', port: '5050'});
     conn.serverInfo({
       callback: function(res) {
         assert.equal('8', res.Cores);
+        done();
       }
     });
   });
