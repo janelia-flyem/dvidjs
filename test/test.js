@@ -12,6 +12,7 @@ require('mocha-sinon');
 var test_host = 'localhost';
 var test_port = '5050';
 var uuid = '24e6ace57d834383bb24ea2b6d38392a';
+var new_uuid = 'e6ace57d834383bb24ea2b6d38392a24';
 
 before(function() {
   var server = shmock(test_port);
@@ -35,6 +36,9 @@ before(function() {
 
   server.post('/api/repo/' + uuid + '/instance').reply(200, '{"result": "Added labels [labelvol] to node '+ uuid +'"}');
   server.post('/api/repo/' + uuid + '/log').reply(200);
+
+  server.post('/api/repos').reply(200, '{"root": "' + new_uuid + '"}');
+
 
 });
 
@@ -232,6 +236,24 @@ describe('single repository requests', function() {
   });
 
 
+});
+
+describe('creating a repository', function() {
+  var conn = dvid.connect({host: test_host, port: test_port});
+  it('should return meta info for the new repository', function(done) {
+    conn.createRepo({
+      'alias': "repo1",
+      "description": "test repo",
+      'callback': function(data) {
+        assert.equal(new_uuid, data.root);
+        done();
+      },
+      'error': function(err) {
+        console.log(err);
+      }
+    });
+
+  });
 });
 
 describe('deprecated requests', function() {
