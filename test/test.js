@@ -4,10 +4,24 @@ var dvid = require('../lib/dvid');
 var Connection = require('../lib/connection');
 var pjson = require('../package.json');
 var shmock = require('shmock');
+var fs = require('fs');
+require('mocha-sinon');
+
+
+
+var test_host = 'localhost';
+var test_port = '5050';
 
 before(function() {
-  var server = shmock(5050);
-  server.get('/api/server/info').reply(200, '{"Cores": 8}');
+  var server = shmock(test_port);
+  server.get('/api/server/info').reply(200, '{"Cores": "8","DVID Version": "b4e2d955-dirty", "Datastore Version": "0.9.2", "Maximum Cores": "8", "Server time": "2016-03-02 09:25:30.344637802 -0500 EST", "Server uptime": "17h55m21.263146348s", "Storage backend": "basholeveldb" }');
+  server.get('/api/server/types').reply(200, '{"imagetile": "github.com/janelia-flyem/dvid/datatype/imagetile", "labelvol": "github.com/janelia-flyem/dvid/datatype/labelvol", "uint8blk": "github.com/janelia-flyem/dvid/datatype/imageblk/uint8.go"}');
+  server.get('/api/server/compiled-types').reply(200, '{"annotation": "github.com/janelia-flyem/dvid/datatype/annotation", "googlevoxels": "github.com/janelia-flyem/dvid/datatype/googlevoxels", "imagetile": "github.com/janelia-flyem/dvid/datatype/imagetile", "keyvalue": "github.com/janelia-flyem/dvid/datatype/keyvalue", "labelblk": "github.com/janelia-flyem/dvid/datatype/labelblk", "labelgraph": "github.com/janelia-flyem/dvid/datatype/labelgraph", "labelvol": "github.com/janelia-flyem/dvid/datatype/labelvol", "multichan16": "github.com/janelia-flyem/dvid/datatype/multichan16", "rgba8blk": "github.com/janelia-flyem/dvid/datatype/imageblk/rgba8.go", "roi": "github.com/janelia-flyem/dvid/datatype/roi", "synapse": "github.com/janelia-flyem/dvid/datatype/synapse", "uint8blk": "github.com/janelia-flyem/dvid/datatype/imageblk/uint8.go"}');
+  server.get('/api/load').reply(200, '{"GET requests": 0, "PUT requests": 0, "active CGo routines": 0, "file bytes read": 0, "file bytes written": 0, "goroutines": 15, "handlers active": 0, "key bytes read": 0, "key bytes written": 0, "value bytes read": 0, "value bytes written": 0}');
+  server.get('/api/repo/1234/info').reply(200, '{}');
+  fs.readFile(__dirname + '/data/repos_info.json', function(err, data) {
+    server.get('/api/repos/info').reply(200, data);
+  });
 });
 
 describe('dvid', function () {
@@ -23,7 +37,7 @@ describe('dvid', function () {
   });
 });
 
-describe('connection', function() {
+describe('connection functions', function() {
   it('should accept a configuration on creation', function() {
     var conn = dvid.connect({host: 'http://www.example.com', port: '1234'});
     assert.equal('1234', conn.config.port);
@@ -86,15 +100,81 @@ describe('connection', function() {
     });
     assert.equal("https://www.foo.com/api/node/123/test/isotropic/xy/512_512/12_34_56/jpg", url);
   });
+});
+
+describe('api requests', function() {
+  var conn = dvid.connect({host: test_host, port: test_port});
 
   it('should return valid server info', function(done) {
-    var conn = dvid.connect({host: 'localhost', port: '5050'});
     conn.serverInfo({
       callback: function(res) {
         assert.equal('8', res.Cores);
+        assert.equal('0.9.2', res["Datastore Version"]);
         done();
       }
     });
   });
+
+  it('should return valid data types', function(done) {
+    conn.serverTypes({
+      callback: function(res) {
+        assert.equal(3, Object.keys(res).length);
+        done();
+      }
+    });
+  });
+
+  it('should return compiled data types', function(done) {
+    conn.serverCompiledTypes({
+      callback: function(res) {
+        assert.equal(12, Object.keys(res).length);
+        done();
+      }
+    });
+  });
+
+  it('should be able to get load information', function(done) {
+    conn.load({
+      callback: function(res) {
+        assert.equal(11, Object.keys(res).length);
+        assert.equal(15, res.goroutines);
+        done();
+      }
+    });
+  });
+
+  it('should be able to get repository meta information', function(done) {
+    conn.reposInfo({
+      callback: function(res) {
+        assert.equal(27, Object.keys(res).length);
+        assert.equal('benchmarking', res['075daf87fc0041958b1e4141a1f8cbce'].Alias);
+        done();
+      }
+    });
+  });
+});
+
+describe('deprecated requests', function() {
+  var conn = dvid.connect({host: test_host, port: test_port});
+
+  //http://stackoverflow.com/questions/30625404/how-to-unit-test-console-output-with-mocha-on-nodejs
+  beforeEach(function() {
+    this.sinon.stub(console, 'warn');
+  });
+
+  it('should warn that a deprecated method is being called', function(done) {
+    conn.get({
+      'uuid': '1234',
+      'endpoint': 'info',
+      'callback': function(data) {
+
+        done();
+      }
+    });
+    assert.ok(console.warn.calledOnce);
+    assert.ok(console.warn.calledWith('The Connection.get() method has been deprecated. Please use the repo method instead.'));
+
+  });
+
 
 });
