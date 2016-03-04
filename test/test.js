@@ -299,6 +299,10 @@ describe('single repository requests', function() {
 describe('actions on a node', function() {
   var conn = dvid.connect({host: test_host, port: test_port});
 
+  beforeEach(function() {
+    this.sinon.stub(console, 'warn');
+  });
+
   it('should return a log entry when requested', function(done) {
     conn.node({
       'uuid': uuid,
@@ -334,6 +338,8 @@ describe('actions on a node', function() {
       'endpoint': 'commit',
       'callback': function(data) {
         assert.equal('Node ' + uuid + ' committed and locked.', data);
+        assert.ok(console.warn.calledOnce);
+        assert.ok(console.warn.calledWith("Couldn't parse response as JSON: SyntaxError: Unexpected token N"));
         done();
       },
     });

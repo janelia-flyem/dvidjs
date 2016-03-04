@@ -23,11 +23,10 @@ module.exports = function(grunt) {
         dest: 'build/dvid.min.js'
       }
     },
-    jasmine: {
-      src: 'build/dvid.js',
-      options: {
-        specs: 'spec/dvid.spec.js',
-        helpers: 'spec/helpers/*.js'
+    mochaTest: {
+      test: {
+        options: {},
+        src: ['test/**/*.js']
       }
     },
     watch: {
@@ -42,10 +41,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-contrib-jasmine');
+  grunt.loadNpmTasks('grunt-mocha-test');
 
   // Default task(s).
   grunt.registerTask('default', ['browserify','uglify']);
-  grunt.registerTask('test', ['browserify','jasmine']);
+  grunt.registerTask('test', ['browserify','mochaTest']);
 
 };

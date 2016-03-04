@@ -7,7 +7,7 @@ describe('dvid', function() {
   it("config defaults should be used if connect is called without options", function() {
     var con1 = this.dvid.connect();
     expect(con1.config.host).toBe(undefined);
-    expect(con1.config.port).toBe(80);
+    expect(con1.config.port).toBe(undefined);
   });
 
   it("connects to a server and fetches the server info", function(done) {
