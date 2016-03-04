@@ -11,6 +11,7 @@ require('mocha-sinon');
 
 var test_host = 'localhost';
 var test_port = '5050';
+var bad_port = '5051';
 var uuid = '24e6ace57d834383bb24ea2b6d38392a';
 var new_uuid = 'e6ace57d834383bb24ea2b6d38392a24';
 
@@ -38,6 +39,10 @@ before(function() {
   server.post('/api/repo/' + uuid + '/log').reply(200);
 
   server.post('/api/repos').reply(200, '{"root": "' + new_uuid + '"}');
+
+  var bad_server = shmock(bad_port);
+
+  bad_server.get('/api/repos/info').reply(200, 'not json');
 
 
 });
@@ -118,10 +123,31 @@ describe('connection functions', function() {
     });
     assert.equal("https://www.foo.com/api/node/123/test/isotropic/xy/512_512/12_34_56/jpg", url);
   });
+
+});
+
+describe('a missing server', function() {
+  var conn = dvid.connect({host: 'localhost', port: 6500});
+
+  it('should throw an error when the server is unreachable', function(done) {
+    conn.serverInfo({
+      'callback': function() {},
+      'error': function(e) {
+        assert.ok(e instanceof Error);
+        assert.ok(/^Failed to connect/.test(e.message));
+        done();
+      }
+    });
+  });
 });
 
 describe('api requests', function() {
   var conn = dvid.connect({host: test_host, port: test_port});
+  var bad_conn = dvid.connect({host: test_host, port: bad_port});
+
+  beforeEach(function() {
+    this.sinon.stub(console, 'warn');
+  });
 
   it('should return valid server info', function(done) {
     conn.serverInfo({
@@ -132,6 +158,16 @@ describe('api requests', function() {
       }
     });
   });
+
+  it('should fail to return serverInfo when no callback is assigned', function(done) {
+    try {
+      conn.serverInfo();
+    } catch(e) {
+      assert.ok(e instanceof Error);
+      done();
+    }
+  });
+
 
   it('should return valid data types', function(done) {
     conn.serverTypes({
@@ -170,6 +206,19 @@ describe('api requests', function() {
       }
     });
   });
+
+
+  it('should warn when server response was not parsable JSON', function(done) {
+    bad_conn.reposInfo({
+      'callback': function(res) {
+        assert.ok(console.warn.calledOnce);
+        assert.ok(console.warn.calledWith("Couldn't parse response as JSON: SyntaxError: Unexpected token o"));
+        done();
+      },
+    });
+  });
+
+
 });
 
 describe('single repository requests', function() {
@@ -253,6 +302,24 @@ describe('creating a repository', function() {
       }
     });
 
+  });
+
+  it('should throw an error when alias is missing', function(done) {
+    try {
+      conn.createRepo();
+    } catch(e) {
+      assert.ok(e instanceof Error);
+      done();
+    }
+  });
+
+  it('should throw an error when description is missing', function(done) {
+    try {
+      conn.createRepo({"alias": "repo alias"});
+    } catch(e) {
+      assert.ok(e instanceof Error);
+      done();
+    }
   });
 });
 
