@@ -40,6 +40,15 @@ before(function() {
 
   server.post('/api/repos').reply(200, '{"root": "' + new_uuid + '"}');
 
+
+  server.get('/api/node/'+ uuid +'/log').reply(200, '{"log": [ "2015-09-11T15:38:26-04:00  look at me, im a node" ] }');
+
+  server.post('/api/node/'+ uuid +'/log').reply(200);
+
+  server.post('/api/node/'+ uuid +'/commit').reply(200, 'Node ' + uuid + ' committed and locked.');
+
+
+
   var bad_server = shmock(bad_port);
 
   bad_server.get('/api/repos/info').reply(200, 'not json');
@@ -284,6 +293,52 @@ describe('single repository requests', function() {
 
   });
 
+
+});
+
+describe('actions on a node', function() {
+  var conn = dvid.connect({host: test_host, port: test_port});
+
+  it('should return a log entry when requested', function(done) {
+    conn.node({
+      'uuid': uuid,
+      'endpoint': 'log',
+      'callback': function(data) {
+        assert.equal(1, Object.keys(data).length);
+        assert.ok(/look at me/.test(data.log[0]));
+        done();
+      },
+    });
+
+  });
+
+  it('should create a log entry when posted', function(done) {
+    conn.node({
+      'uuid': uuid,
+      'endpoint': 'log',
+      'method': 'POST',
+      'payload': '{log: ["creating an entry"]}',
+      'callback': function(data) {
+        assert.equal(undefined, data);
+        done();
+      },
+    });
+
+  });
+
+  it('should lock a node when commited', function(done) {
+    conn.node({
+      'uuid': uuid,
+      'method': 'POST',
+      'payload': '{log: ["lock message"]}',
+      'endpoint': 'commit',
+      'callback': function(data) {
+        assert.equal('Node ' + uuid + ' committed and locked.', data);
+        done();
+      },
+    });
+
+  });
 
 });
 
