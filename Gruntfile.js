@@ -29,6 +29,15 @@ module.exports = function(grunt) {
         src: ['test/**/*.js']
       }
     },
+    jsdoc: {
+      dist: {
+        src: ['lib/**/*.js', 'README.md', 'package.json'],
+        options: {
+          desintation: 'doc',
+          template : "node_modules/ink-docstrap/template"
+        }
+      }
+    },
     watch: {
       scripts: {
         files: ['lib/**/*.js'],
@@ -42,9 +51,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-mocha-test');
+  grunt.loadNpmTasks('grunt-jsdoc');
 
   // Default task(s).
   grunt.registerTask('default', ['browserify','uglify']);
   grunt.registerTask('test', ['browserify','mochaTest']);
+  grunt.registerTask('docs', ['jsdoc']);
 
 };
