@@ -14,6 +14,7 @@ The simplest way to install is via [npm](https://www.npmjs.com)
 
 Available Methods
 =================
+Check the documentation generated with JSDoc.
 
 
 Developers
