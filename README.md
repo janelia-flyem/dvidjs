@@ -16,6 +16,10 @@ Available Methods
 =================
 Check the documentation generated with JSDoc.
 
+  # inside the repository
+  > grunt jsdoc
+  > open doc/dvid/<current verison>/index.html
+
 
 Developers
 ==========
