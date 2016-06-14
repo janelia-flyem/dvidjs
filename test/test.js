@@ -71,52 +71,62 @@ describe('dvid', function () {
 
 describe('connection functions', function() {
   it('should accept a configuration on creation', function() {
-    var conn = dvid.connect({host: 'http://www.example.com', port: '1234'});
+    var conn = dvid.connect({host: 'http://www.example.com', port: '1234', username: 'testuser', application: 'test_app'});
     assert.equal('1234', conn.config.port);
     assert.equal('www.example.com', conn.config.host);
+    assert.equal('testuser', conn.config.username);
+    assert.equal('test_app', conn.config.application);
   });
 
   it('should set undefined as default on creation with no arguments', function() {
     var conn = dvid.connect();
     assert.equal(undefined, conn.config.port);
     assert.equal(undefined, conn.config.host);
+    assert.equal('anonymous', conn.config.username);
+    assert.equal('dvidjs', conn.config.application);
   });
 
   it('should create a valid url when given good data and no host', function() {
     var conn = dvid.connect();
     var url = conn.createUrl('bar/baz');
-    assert.equal('/bar/baz', url);
+    assert.equal('/bar/baz?u=anonymous&app=dvidjs', url);
 
     var url2 = conn.createUrl('/bar/baz');
-    assert.equal('/bar/baz', url2);
+    assert.equal('/bar/baz?u=anonymous&app=dvidjs', url2);
 
     var url3 = conn.createUrl('http://foo.com/bar/baz');
-    assert.equal('http://foo.com/bar/baz', url3);
+    assert.equal('http://foo.com/bar/baz?u=anonymous&app=dvidjs', url3);
 
   });
 
   it('should create a valid url when given good data and a host', function() {
     var conn = dvid.connect({host: 'wibble.com'});
     var url = conn.createUrl('bar/baz');
-    assert.equal('http://wibble.com/bar/baz', url);
+    assert.equal('http://wibble.com/bar/baz?u=anonymous&app=dvidjs', url);
+  });
+
+  it('should create set the correct username and application when provided', function() {
+    var conn = dvid.connect({host: 'wibble.com', application: 'test_app', username: 'testuser'});
+    var url = conn.createUrl('bar/baz');
+    assert.equal('http://wibble.com/bar/baz?u=testuser&app=test_app', url);
   });
 
   it('should use the correct protocol', function() {
     var conn = dvid.connect({host: 'https://www.foo.com'});
     var url = conn.createUrl('bar/baz');
-    assert.equal("https://www.foo.com/bar/baz", url);
+    assert.equal("https://www.foo.com/bar/baz?u=anonymous&app=dvidjs", url);
 
     var conn2 = dvid.connect({host: 'https://www.foo.com', port: '8000'});
     var url2 = conn2.createUrl('bar/baz');
-    assert.equal("https://www.foo.com:8000/bar/baz", url2);
+    assert.equal("https://www.foo.com:8000/bar/baz?u=anonymous&app=dvidjs", url2);
 
     var conn3 = dvid.connect({host: 'foo.com', port: '8000', protocol: 'https'});
     var url3 = conn3.createUrl('bar/baz');
-    assert.equal("https://foo.com:8000/bar/baz", url3);
+    assert.equal("https://foo.com:8000/bar/baz?u=anonymous&app=dvidjs", url3);
 
     var conn4 = dvid.connect({host: 'foo.com'});
     var url4 = conn4.createUrl('bar/baz');
-    assert.equal("http://foo.com/bar/baz", url4);
+    assert.equal("http://foo.com/bar/baz?u=anonymous&app=dvidjs", url4);
   });
 
   it('should create valid iso image urls', function() {
@@ -130,7 +140,7 @@ describe('connection functions', function() {
       y: '34',
       z: '56'
     });
-    assert.equal("https://www.foo.com/api/node/123/test/isotropic/xy/512_512/12_34_56/jpg", url);
+    assert.equal("https://www.foo.com/api/node/123/test/isotropic/xy/512_512/12_34_56/jpg?u=anonymous&app=dvidjs", url);
   });
 
 });
