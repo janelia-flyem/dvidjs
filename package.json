@@ -1,6 +1,6 @@
 {
   "name": "dvid",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "DVID API",
   "repository": {
     "type": "git",
