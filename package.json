@@ -1,15 +1,15 @@
 {
   "name": "dvid",
-  "version": "0.7.1",
+  "version": "1.0.0",
   "description": "DVID API",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "esbuild ./src/index.jsx --bundle --minify --sourcemap --target=chrome58,firefox57,safari11,edge16 --outfile=dist/dvid.js",
+    "test": "jest"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/janelia-flyem/dvidjs"
-  },
-  "main": "./lib/dvid.js",
-  "scripts": {
-    "test": "mocha test",
-    "cover": "./node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha test"
+    "url": "git+https://github.com/janelia-flyem/dvidjs.git"
   },
   "keywords": [
     "dvid",
@@ -17,26 +17,17 @@
     "images"
   ],
   "author": "Jody Clements",
-  "license": {
-    "type": "Janelia",
-    "url": "http://janelia-flyem.github.io/janelia_farm_license.html"
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/janelia-flyem/dvidjs/issues"
+  },
+  "homepage": "https://github.com/janelia-flyem/dvidjs#readme",
+  "dependencies": {
+    "axios": "^0.27.2"
   },
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-browserify": "^3.8.0",
-    "grunt-contrib-jasmine": "^0.8.2",
-    "grunt-contrib-uglify": "^0.9.1",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-jsdoc": "^1.1.0",
-    "grunt-mocha-test": "^0.12.7",
-    "ink-docstrap": "^1.1.4",
-    "mocha": "^2.4.5",
-    "mocha-sinon": "^1.1.5",
-    "shmock": "^0.8.1",
-    "sinon": "^1.17.3"
-  },
-  "dependencies": {
-    "url": "^0.11.0",
-    "xmlhttprequest": "^1.8.0"
+    "eslint": "^8.20.0",
+    "jest": "^28.1.3",
+    "prettier": "^2.7.1"
   }
 }
