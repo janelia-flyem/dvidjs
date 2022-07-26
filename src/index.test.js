@@ -143,7 +143,7 @@ it("gets reposInfo", async () => {
 
 
 it("gets data from repo endpoint 'info'", async () => {
-  axios.get.mockResolvedValue({ data: repoInfoData });
+  axios.request.mockResolvedValue({ data: repoInfoData });
   const info = await api.repo({
     uuid: "2b6d75f1c6e348ce945e1a66eb2f6bf3",
     endpoint: "info",
@@ -151,14 +151,32 @@ it("gets data from repo endpoint 'info'", async () => {
   expect(info).toEqual(repoInfoData);
 });
 
+it("posts data to repo endpoint 'info'", async () => {
+  axios.request.mockResolvedValue({ data: repoInfoData });
+  const info = await api.repo({
+    uuid: "2b6d75f1c6e348ce945e1a66eb2f6bf3",
+    endpoint: "info",
+    method: "post",
+    data: { test: "value"}
+  });
+  expect(info).toEqual(repoInfoData);
+});
+
+
 it("throws an error if repo endpoint or uuid is missing", async () => {
   await expect(async () => {
     await api.repo();
-  }).rejects.toThrowError("UUID required to access repo data");
+  }).rejects.toThrowError("uuid parameter is required to access repo data");
 
   await expect(async () => {
     await api.repo({uuid: "123456678"});
-  }).rejects.toThrowError("endpoint required to access repo data");
+  }).rejects.toThrowError("endpoint parameter is required to access repo data");
+});
+
+it("throws an error if repo get is called with data parameter", async () => {
+  await expect(async () => {
+    await api.repo({uuid: "123456678", endpoint: "/info", data: {test: "value"}});
+  }).rejects.toThrowError("Request data can only be sent with a post request. Please add {method: \"post\"} to your options.");
 });
 
 it("throws an error if node endpoint or uuid is missing", async () => {
@@ -198,4 +216,6 @@ it("gets data from node endpoint 'synapses/info'", async () => {
   });
   expect(info).toEqual(nodeData);
 });
+
+
 

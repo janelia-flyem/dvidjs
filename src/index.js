@@ -90,17 +90,39 @@ class DVID {
 
   async repo(options) {
     options = options || {};
+
+    let method = 'get';
+    if (options.method) {
+      if (['get', 'post'].includes(options.method)) {
+        method = options.method;
+        delete options.method;
+      } else {
+        throw new Error("Only 'get' or 'post' methods are allowed");
+      }
+    }
     if (!Object.hasOwnProperty.call(options, 'uuid')) {
-      throw new Error('UUID required to access repo data');
+      throw new Error('uuid parameter is required to access repo data');
     }
     if (!Object.hasOwnProperty.call(options, 'endpoint')) {
-      throw new Error('endpoint required to access repo data');
+      throw new Error('endpoint parameter is required to access repo data');
     }
 
     const fullUrl = this.createUrl(
       `api/repo/${options.uuid}/${options.endpoint}`
     );
-    const { data } = await axios.get(fullUrl);
+
+    const requestConfig = { method, url: fullUrl };
+
+    if (options.data) {
+      if (method === 'post') {
+        requestConfig.data = options.data
+      }
+      else {
+        throw new Error('Request data can only be sent with a post request. Please add {method: "post"} to your options.');
+      }
+    }
+
+    const { data } = await axios.request(requestConfig);
     return data;
   }
 
